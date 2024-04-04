@@ -38,18 +38,23 @@ public class Assignment8Test {
     }
 
     @Test
-    void thenAcceptStream() {
-        for (int i = 0; i < EXPERIMENT_RUN_COUNT; i++) {
-            runExperiment((list) -> list.forEach(num -> concurrentMap.merge(num, 1, Integer::sum)));
-        }
+    void assignment8Solution() {
+        runExperiment((list) -> list.forEach(num -> concurrentMap.merge(num, 1, Integer::sum)));
     }
 
-    @Test
-    void thenAcceptParallelStream() {
-        for (int i = 0; i < EXPERIMENT_RUN_COUNT; i++) {
-            runExperiment((list) -> list.parallelStream().forEach(num -> concurrentMap.merge(num, 1, Integer::sum)));
-        }
-    }
+//    @Test
+//    void thenAcceptStream() {
+//        for (int i = 0; i < EXPERIMENT_RUN_COUNT; i++) {
+//            runExperiment((list) -> list.forEach(num -> concurrentMap.merge(num, 1, Integer::sum)));
+//        }
+//    }
+
+//    @Test
+//    void thenAcceptParallelStream() {
+//        for (int i = 0; i < EXPERIMENT_RUN_COUNT; i++) {
+//            runExperiment((list) -> list.parallelStream().forEach(num -> concurrentMap.merge(num, 1, Integer::sum)));
+//        }
+//    }
 
 //    @Test
 //    void thenAcceptThreadPoolExecuteStream() {
@@ -65,19 +70,19 @@ public class Assignment8Test {
 //        }
 //    }
 
-    @Test
-    void thenAcceptAsyncStream() {
-        for (int i = 0; i < EXPERIMENT_RUN_COUNT; i++) {
-            runExperimentAsync((list) -> list.forEach(num -> concurrentMap.merge(num, 1, Integer::sum)));
-        }
-    }
+//    @Test
+//    void thenAcceptAsyncStream() {
+//        for (int i = 0; i < EXPERIMENT_RUN_COUNT; i++) {
+//            runExperimentAsync((list) -> list.forEach(num -> concurrentMap.merge(num, 1, Integer::sum)));
+//        }
+//    }
 
-    @Test
-    void thenAcceptAsyncParallelStream() {
-        for (int i = 0; i < EXPERIMENT_RUN_COUNT; i++) {
-            runExperimentAsync((list) -> list.parallelStream().forEach(num -> concurrentMap.merge(num, 1, Integer::sum)));
-        }
-    }
+//    @Test
+//    void thenAcceptAsyncParallelStream() {
+//        for (int i = 0; i < EXPERIMENT_RUN_COUNT; i++) {
+//            runExperimentAsync((list) -> list.parallelStream().forEach(num -> concurrentMap.merge(num, 1, Integer::sum)));
+//        }
+//    }
 
 //    @Test
 //    void thenAcceptAsyncThreadPoolExecuteStream() {
