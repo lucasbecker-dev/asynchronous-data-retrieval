@@ -17,7 +17,7 @@ public class Assignment8Test {
     private final int EXPERIMENT_RUN_COUNT = 100;
     private Assignment8 assignment;
     private ConcurrentMap<Integer, Integer> concurrentMap;
-    private Executor threadPool;
+    private ExecutorService threadPool;
 //    private Executor threadPoolWrite;
     private List<CompletableFuture<Void>> taskList;
 
@@ -34,7 +34,7 @@ public class Assignment8Test {
     void tearDown() {
         taskList.clear();
         concurrentMap.clear();
-        ((ExecutorService) threadPool).shutdown();
+        threadPool.shutdown();
     }
 
     @Test
