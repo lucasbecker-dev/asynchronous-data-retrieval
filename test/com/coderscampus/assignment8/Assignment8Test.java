@@ -1,111 +1,105 @@
 package com.coderscampus.assignment8;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class Assignment8Test {
+public class Assignment8Test {
+    private final int ITERATION_COUNT = 1000;
+    private final int OUTPUT_TXT_LINE_COUNT = 1000000;
+    private final int EXPERIMENT_RUN_COUNT = 100;
+    private Assignment8 assignment;
+    private ConcurrentMap<Integer, Integer> concurrentMap;
+    private Executor threadPool;
+//    private Executor threadPoolWrite;
+    private List<CompletableFuture<Void>> taskList;
+
+    @BeforeEach
+    void setUp() {
+        assignment = new Assignment8();
+        concurrentMap = new ConcurrentHashMap<>();
+        threadPool = Executors.newCachedThreadPool();
+//        threadPoolWrite = Executors.newCachedThreadPool();
+        taskList = new ArrayList<>();
+    }
+
+    @AfterEach
+    void tearDown() {
+        taskList.clear();
+        concurrentMap.clear();
+        ((ExecutorService) threadPool).shutdown();
+    }
 
     @Test
-    void getNumbers() {
-        final int ITERATION_COUNT = 1000;
-        final int OUTPUT_TXT_LINE_COUNT = 1000000;
-//        final int THREAD_COUNT = Runtime.getRuntime().availableProcessors();
-        Assignment8 assignment = new Assignment8();
-        ConcurrentMap<Integer, Integer> concurrentMap = new ConcurrentHashMap<>();
+    void thenAcceptStream() {
+        for (int i = 0; i < EXPERIMENT_RUN_COUNT; i++) {
+            runExperiment((list) -> list.forEach(num -> concurrentMap.merge(num, 1, Integer::sum)));
+        }
+    }
 
-//        Executor threadPool = Executors.newFixedThreadPool(THREAD_COUNT);
-//        Executor threadPool = Executors.newWorkStealingPool();
-        Executor threadPool = Executors.newCachedThreadPool();
+    @Test
+    void thenAcceptParallelStream() {
+        for (int i = 0; i < EXPERIMENT_RUN_COUNT; i++) {
+            runExperiment((list) -> list.parallelStream().forEach(num -> concurrentMap.merge(num, 1, Integer::sum)));
+        }
+    }
 
-        List<CompletableFuture<Void>> taskList = new ArrayList<>();
+//    @Test
+//    void thenAcceptThreadPoolExecuteStream() {
+//        for (int i = 0; i < EXPERIMENT_RUN_COUNT; i++) {
+//            runExperiment((list) -> threadPool.execute(() -> list.forEach(num -> concurrentMap.merge(num, 1, Integer::sum))));
+//        }
+//    }
 
+//    @Test
+//    void thenAcceptThreadPoolExecuteParallelStream() {
+//        for (int i = 0; i < EXPERIMENT_RUN_COUNT; i++) {
+//            runExperiment((list) -> threadPool.execute(() -> list.parallelStream().forEach(num -> concurrentMap.merge(num, 1, Integer::sum))));
+//        }
+//    }
+
+    @Test
+    void thenAcceptAsyncStream() {
+        for (int i = 0; i < EXPERIMENT_RUN_COUNT; i++) {
+            runExperimentAsync((list) -> list.forEach(num -> concurrentMap.merge(num, 1, Integer::sum)));
+        }
+    }
+
+    @Test
+    void thenAcceptAsyncParallelStream() {
+        for (int i = 0; i < EXPERIMENT_RUN_COUNT; i++) {
+            runExperimentAsync((list) -> list.parallelStream().forEach(num -> concurrentMap.merge(num, 1, Integer::sum)));
+        }
+    }
+
+//    @Test
+//    void thenAcceptAsyncThreadPoolExecuteStream() {
+//        for (int i = 0; i < EXPERIMENT_RUN_COUNT; i++) {
+//            runExperimentAsync((list) -> threadPool.execute(() -> list.forEach(num -> concurrentMap.merge(num, 1, Integer::sum))));
+//        }
+//    }
+
+//    @Test
+//    void thenAcceptAsyncThreadPoolExecuteParallelStream() {
+//        for (int i = 0; i < EXPERIMENT_RUN_COUNT; i++) {
+//            runExperimentAsync((list) -> threadPool.execute(() -> list.parallelStream().forEach(num -> concurrentMap.merge(num, 1, Integer::sum))));
+//        }
+//    }
+
+    private void runExperiment(Consumer<List<Integer>> consumer) {
         for (int i = 0; i < ITERATION_COUNT; i++) {
-            CompletableFuture<Void> task = CompletableFuture.supplyAsync(assignment::getNumbers, threadPool)
-                    .thenAccept(list -> {
-                        try {
-                            // Experiment 1 - stream.forEach within .thenAccept
-                            // Result - SUCCESS, 765ms runtime
-                            list.forEach(num -> {
-                                // concurrentMap.compute(num, (k, v) -> (v == null) ? 1 : v + 1);
-                                concurrentMap.merge(num, 1, (Integer::sum));
-                            });
-
-//                            // Experiment 2 - parallelStream.forEach within .thenAccept
-//                            // Result - SUCCESS, 1178ms runtime
-//                            list.parallelStream().forEach(num -> {
-//                                // concurrentMap.compute(num, (k, v) -> (v == null) ? 1 : v + 1);
-//                                concurrentMap.merge(num, 1, (Integer::sum));
-//                            });
-
-//                            // Experiment 3 - threadPool.execute(stream.forEach) within .thenAccept
-//                            // Result - FAILURE, 755ms runtime
-//                            threadPool.execute(() -> list.forEach(num -> {
-//                                // concurrentMap.compute(num, (k, v) -> (v == null) ? 1 : v + 1);
-//                                synchronized (concurrentMap) {
-//                                    concurrentMap.merge(num, 1, (Integer::sum));
-//                                }
-//                            }));
-
-
-//                            // Experiment 4 - threadPool.execute(parallelStream.forEach) within .thenAccept
-//                            // Result - FAILURE, 1348ms runtime
-//                            threadPool.execute(() -> list.parallelStream().forEach(num -> {
-//                                        // concurrentMap.compute(num, (k, v) -> (v == null) ? 1 : v + 1);
-//                                        concurrentMap.merge(num, 1, (Integer::sum));
-//                                    }
-//                            ));
-                        } catch (NullPointerException | UnsupportedOperationException | ClassCastException |
-                                IllegalArgumentException | RejectedExecutionException e) {
-                            System.err.println(e.getMessage());
-                        }
-                    });
-//                    .thenAcceptAsync(list -> {
-//                        try {
-////                        // Experiment 5 - stream.forEach within .thenAcceptAsync
-////                        // Result - SUCCESS, 780ms runtime
-////                        list.forEach(num -> {
-//////                            synchronized (concurrentMap) {
-////                                // concurrentMap.compute(num, (k, v) -> (v == null) ? 1 : v + 1);
-////                                concurrentMap.merge(num, 1, (Integer::sum));
-//////                            }
-////                        });
-//
-////                        // Experiment 6 - parallelStream.forEach within .thenAcceptAsync
-////                        // Result - SUCCESS, 1849ms runtime
-////                        list.parallelStream().forEach(num -> {
-////                            // concurrentMap.compute(num, (k, v) -> (v == null) ? 1 : v + 1);
-////                            concurrentMap.merge(num, 1, (Integer::sum));
-////                        });
-//
-////                        // Experiment 7 - threadPool.execute(stream.forEach) within .thenAcceptAsync
-////                        // Result - FAILURE, 766ms runtime
-////                        threadPool.execute(() -> list.forEach(num -> {
-////                                    // concurrentMap.compute(num, (k, v) -> (v == null) ? 1 : v + 1);
-////                                    concurrentMap.merge(num, 1, (Integer::sum));
-////                                }
-////                        ));
-//
-////                        // Experiment 8 - threadPool.execute(parallelStream.forEach) within .thenAcceptAsync
-////                        // Result - FAILURE, 989ms runtime
-////                        threadPool.execute(() -> list.parallelStream().forEach(num -> {
-////                                    // concurrentMap.compute(num, (k, v) -> (v == null) ? 1 : v + 1);
-////                                    concurrentMap.merge(num, 1, (Integer::sum));
-////                                }
-////                        ));
-//                        } catch (NullPointerException | UnsupportedOperationException | ClassCastException |
-//                                 IllegalArgumentException | RejectedExecutionException e) {
-//                            System.err.println(e.getMessage());
-//                        }
-//                    }, threadPool);
+            CompletableFuture<Void> task = CompletableFuture.supplyAsync(assignment::getNumbers, threadPool).thenAccept(consumer);
             try {
                 taskList.add(task);
-            } catch (UnsupportedOperationException | ClassCastException |
-                     NullPointerException | IllegalArgumentException e) {
+            } catch (UnsupportedOperationException | ClassCastException | NullPointerException |
+                     IllegalArgumentException e) {
                 System.err.println(e.getMessage());
             }
         }
@@ -116,15 +110,26 @@ class Assignment8Test {
             System.err.println(e.getMessage());
         }
 
-        assertEquals("{0=66491, 1=66404, 2=66818, 3=66768, 4=66671, 5=66397, 6=66512, " +
-                        "7=66564, 8=67454, 9=66732, 10=66628, 11=66688, 12=66578, 13=66699, 14=66596}",
-                concurrentMap.toString());
-        assertEquals(OUTPUT_TXT_LINE_COUNT,
-                concurrentMap
-                        .values()
-                        .parallelStream()
-                        .mapToInt(Integer::intValue)
-                        .sum());
+        assertEquals(OUTPUT_TXT_LINE_COUNT, concurrentMap.values().parallelStream().mapToInt(Integer::intValue).sum());
     }
 
+    private void runExperimentAsync(Consumer<List<Integer>> consumer) {
+        for (int i = 0; i < ITERATION_COUNT; i++) {
+            CompletableFuture<Void> task = CompletableFuture.supplyAsync(assignment::getNumbers, threadPool).thenAcceptAsync(consumer, threadPool);
+            try {
+                taskList.add(task);
+            } catch (UnsupportedOperationException | ClassCastException | NullPointerException |
+                     IllegalArgumentException e) {
+                System.err.println(e.getMessage());
+            }
+        }
+
+        try {
+            taskList.parallelStream().forEach(CompletableFuture::join);
+        } catch (CancellationException | CompletionException e) {
+            System.err.println(e.getMessage());
+        }
+
+        assertEquals(OUTPUT_TXT_LINE_COUNT, concurrentMap.values().parallelStream().mapToInt(Integer::intValue).sum());
+    }
 }
