@@ -111,12 +111,16 @@ public class Assignment8Test {
         }
 
         try {
-            taskList.parallelStream().forEach(CompletableFuture::join);
+            taskList.parallelStream()
+                    .forEach(CompletableFuture::join);
         } catch (CancellationException | CompletionException e) {
             System.err.println(e.getMessage());
         }
 
-        assertEquals(OUTPUT_TXT_LINE_COUNT, concurrentMap.values().parallelStream().mapToInt(Integer::intValue).sum());
+        assertEquals(OUTPUT_TXT_LINE_COUNT, concurrentMap.values()
+                                                         .parallelStream()
+                                                         .mapToInt(Integer::intValue)
+                                                         .sum());
     }
 
     private void runExperimentAsync(Consumer<List<Integer>> consumer) {
@@ -132,11 +136,16 @@ public class Assignment8Test {
         }
 
         try {
-            taskList.parallelStream().forEach(CompletableFuture::join);
+            taskList.parallelStream()
+                    .forEach(CompletableFuture::join);
         } catch (CancellationException | CompletionException e) {
             System.err.println(e.getMessage());
         }
 
-        assertEquals(OUTPUT_TXT_LINE_COUNT, concurrentMap.values().parallelStream().mapToInt(Integer::intValue).sum());
+        assertEquals(OUTPUT_TXT_LINE_COUNT, concurrentMap.values()
+                                                         .parallelStream()
+                                                         .mapToInt(Integer::intValue)
+                                                         .sum()
+        );
     }
 }
