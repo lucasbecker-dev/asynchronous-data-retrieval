@@ -100,8 +100,9 @@ public class Assignment8Test {
 
     private void runExperiment(Consumer<List<Integer>> consumer) {
         for (int i = 0; i < ITERATION_COUNT; i++) {
-            CompletableFuture<Void> task = CompletableFuture.supplyAsync(assignment::getNumbers, threadPool).thenAccept(consumer);
             try {
+                CompletableFuture<Void> task = CompletableFuture.supplyAsync(assignment::getNumbers, threadPool)
+                                                                .thenAccept(consumer);
                 taskList.add(task);
             } catch (UnsupportedOperationException | ClassCastException | NullPointerException |
                      IllegalArgumentException e) {
@@ -120,8 +121,9 @@ public class Assignment8Test {
 
     private void runExperimentAsync(Consumer<List<Integer>> consumer) {
         for (int i = 0; i < ITERATION_COUNT; i++) {
-            CompletableFuture<Void> task = CompletableFuture.supplyAsync(assignment::getNumbers, threadPool).thenAcceptAsync(consumer, threadPool);
             try {
+                CompletableFuture<Void> task = CompletableFuture.supplyAsync(assignment::getNumbers, threadPool)
+                                                                .thenAcceptAsync(consumer, threadPool);
                 taskList.add(task);
             } catch (UnsupportedOperationException | ClassCastException | NullPointerException |
                      IllegalArgumentException e) {
