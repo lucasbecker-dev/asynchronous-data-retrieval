@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
 
@@ -40,6 +41,7 @@ public class Assignment8Test {
     @Test
     void assignment8Solution() {
         runExperiment((list) -> list.forEach(num -> concurrentMap.merge(num, 1, Integer::sum)));
+        printResult();
     }
 
 //    @Test
@@ -147,5 +149,15 @@ public class Assignment8Test {
                                                          .mapToInt(Integer::intValue)
                                                          .sum()
         );
+    }
+
+    private void printResult() {
+        Integer lastKey = (Integer) concurrentMap.keySet().toArray()[concurrentMap.size() - 1];
+        for (Map.Entry<Integer, Integer> entry : concurrentMap.entrySet()) {
+            System.out.print(entry.getKey().toString() + "=" + entry.getValue().toString());
+            if (!entry.getKey().equals(lastKey)) {
+                System.out.print(", ");
+            }
+        }
     }
 }
