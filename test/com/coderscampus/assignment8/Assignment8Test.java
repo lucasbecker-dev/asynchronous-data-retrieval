@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
@@ -19,7 +20,7 @@ public class Assignment8Test {
     private Assignment8 assignment;
     private ConcurrentMap<Integer, Integer> concurrentMap;
     private ExecutorService threadPool;
-//    private Executor threadPoolWrite;
+    //    private Executor threadPoolWrite;
     private List<CompletableFuture<Void>> taskList;
 
     @BeforeEach
@@ -104,7 +105,7 @@ public class Assignment8Test {
         for (int i = 0; i < ITERATION_COUNT; i++) {
             try {
                 CompletableFuture<Void> task = CompletableFuture.supplyAsync(assignment::getNumbers, threadPool)
-                                                                .thenAccept(consumer);
+                        .thenAccept(consumer);
                 taskList.add(task);
             } catch (UnsupportedOperationException | ClassCastException | NullPointerException |
                      IllegalArgumentException e) {
@@ -120,16 +121,16 @@ public class Assignment8Test {
         }
 
         assertEquals(OUTPUT_TXT_LINE_COUNT, concurrentMap.values()
-                                                         .parallelStream()
-                                                         .mapToInt(Integer::intValue)
-                                                         .sum());
+                .parallelStream()
+                .mapToInt(Integer::intValue)
+                .sum());
     }
 
     private void runExperimentAsync(Consumer<List<Integer>> consumer) {
         for (int i = 0; i < ITERATION_COUNT; i++) {
             try {
                 CompletableFuture<Void> task = CompletableFuture.supplyAsync(assignment::getNumbers, threadPool)
-                                                                .thenAcceptAsync(consumer, threadPool);
+                        .thenAcceptAsync(consumer, threadPool);
                 taskList.add(task);
             } catch (UnsupportedOperationException | ClassCastException | NullPointerException |
                      IllegalArgumentException e) {
@@ -145,19 +146,27 @@ public class Assignment8Test {
         }
 
         assertEquals(OUTPUT_TXT_LINE_COUNT, concurrentMap.values()
-                                                         .parallelStream()
-                                                         .mapToInt(Integer::intValue)
-                                                         .sum()
+                .parallelStream()
+                .mapToInt(Integer::intValue)
+                .sum()
         );
     }
 
     private void printResult() {
-        Integer lastKey = (Integer) concurrentMap.keySet().toArray()[concurrentMap.size() - 1];
-        for (Map.Entry<Integer, Integer> entry : concurrentMap.entrySet()) {
-            System.out.print(entry.getKey().toString() + "=" + entry.getValue().toString());
-            if (!entry.getKey().equals(lastKey)) {
-                System.out.print(", ");
+        StringBuilder sb = new StringBuilder();
+        Iterator<Map.Entry<Integer, Integer>> iterator = concurrentMap.entrySet().iterator();
+
+        while (iterator.hasNext()) {
+            Map.Entry<Integer, Integer> entry = iterator.next();
+            sb.append(entry.getKey());
+            sb.append('=');
+            sb.append(entry.getValue());
+
+            if (iterator.hasNext()) {
+                sb.append(", ");
             }
         }
+
+        System.out.println(sb);
     }
 }
